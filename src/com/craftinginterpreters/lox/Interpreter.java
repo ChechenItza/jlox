@@ -25,6 +25,118 @@ class Interpreter implements Expr.Visitor<Object>,
             @Override
             public String toString() { return "<native fn>"; }
         });
+        globals.define("input", new LoxCallable() {
+            @Override
+            public int arity() { return 0; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return new java.util.Scanner(System.in).nextLine();
+            }
+        });
+        globals.define("compareStr", new LoxCallable() {
+           @Override
+           public int arity() { return 2; }
+
+           @Override
+           public Object call(Interpreter interpreter,
+                              List<Object> arguments) {
+               return ((String)arguments.get(0)).compareTo((String)arguments.get(1));
+           }
+        });
+        globals.define("equalsStr", new LoxCallable() {
+            @Override
+            public int arity() { return 2; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return ((String)arguments.get(0)).equals((String)arguments.get(1));
+            }
+        });
+        globals.define("charAt", new LoxCallable() {
+            @Override
+            public int arity() { return 2; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return ((String)arguments.get(0)).charAt((int)(double)arguments.get(1));
+            }
+        });
+        globals.define("substring", new LoxCallable() {
+            @Override
+            public int arity() { return 3; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return ((String)arguments.get(0)).substring((int)(double)arguments.get(1),
+                                                            (int)(double)arguments.get(2));
+
+            }
+        });
+        globals.define("lengthStr", new LoxCallable() {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return ((String)arguments.get(0)).length();
+            }
+        });
+        globals.define("abs", new LoxCallable() {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return java.lang.Math.abs((double)arguments.get(0));
+            }
+        });
+        globals.define("round", new LoxCallable() {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return java.lang.Math.round((double)arguments.get(0));
+            }
+        });
+        globals.define("min", new LoxCallable() {
+            @Override
+            public int arity() { return 2; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return java.lang.Math.min((double)arguments.get(0), (double)arguments.get(1));
+            }
+        });
+        globals.define("max", new LoxCallable() {
+            @Override
+            public int arity() { return 2; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return java.lang.Math.max((double)arguments.get(0), (double)arguments.get(1));
+            }
+        });
+        globals.define("random", new LoxCallable() {
+            @Override
+            public int arity() { return 0; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                return java.lang.Math.random();
+            }
+        });
     }
 
     void interpret(List<Stmt> statements) {
@@ -68,6 +180,42 @@ class Interpreter implements Expr.Visitor<Object>,
     }
 
     @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        
+      Object superclass = null;
+      if (stmt.superclass != null) {
+          superclass = evaluate(stmt.superclass);
+          if (!(superclass instanceof LoxClass)) {
+          throw new RuntimeError(stmt.superclass.name,
+              "Superclass must be a class.");
+          }
+      }
+
+      environment.define(stmt.name.lexeme, null);
+
+      if (stmt.superclass != null) { 
+        environment = new Environment(environment);
+        environment.define("super", superclass);
+      }
+
+      Map<String, LoxFunction> methods = new HashMap<>();
+      for (Stmt.Function method : stmt.methods) {
+        LoxFunction function = new LoxFunction(method, environment,
+        method.name.lexeme.equals("init"));
+        methods.put(method.name.lexeme, function);
+      }
+  
+      LoxClass klass = new LoxClass(stmt.name.lexeme, (LoxClass)superclass, methods);
+
+      if (superclass != null) {
+        environment = environment.enclosing;
+      }
+
+      environment.assign(stmt.name, klass);
+      return null;
+    }
+
+    @Override
     public Void visitIfStmt(Stmt.If stmt) {
         if (isTruthy(evaluate(stmt._if))) {
             execute(stmt._then);
@@ -97,7 +245,7 @@ class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        LoxFunction function = new LoxFunction(stmt, environment);
+        LoxFunction function = new LoxFunction(stmt, environment, false);
         environment.define(stmt.name.lexeme, function);
         return null;
     }
@@ -146,6 +294,17 @@ class Interpreter implements Expr.Visitor<Object>,
         }
 
         return function.call(this, arguments);
+    }
+
+    @Override
+    public Object visitGetExpr(Expr.Get expr) {
+      Object object = evaluate(expr.object);
+      if (object instanceof LoxInstance) {
+        return ((LoxInstance) object).get(expr.name);
+      }
+  
+      throw new RuntimeError(expr.name,
+          "Only instances have properties.");
     }
 
     @Override
@@ -254,6 +413,43 @@ class Interpreter implements Expr.Visitor<Object>,
         }
 
         return evaluate(expr.right);
+    }
+
+    @Override
+    public Object visitSetExpr(Expr.Set expr) {
+      Object object = evaluate(expr.object);
+  
+      if (!(object instanceof LoxInstance)) { 
+        throw new RuntimeError(expr.name,
+                               "Only instances have fields.");
+      }
+  
+      Object value = evaluate(expr.value);
+      ((LoxInstance)object).set(expr.name, value);
+      return value;
+    }
+
+    @Override
+    public Object visitSuperExpr(Expr.Super expr) {
+      int distance = locals.get(expr);
+
+      LoxClass superclass = (LoxClass)environment.getAt(
+          distance, "super");
+
+      LoxInstance object = (LoxInstance)environment.getAt(
+          distance - 1, "this");
+
+      LoxFunction method = superclass.findMethod(expr.method.lexeme);
+      if (method == null) {
+        throw new RuntimeError(expr.method,
+            "Undefined property '" + expr.method.lexeme + "'.");
+      }
+      return method.bind(object);
+    }
+
+    @Override
+    public Object visitThisExpr(Expr.This expr) {
+      return lookUpVariable(expr.keyword, expr);
     }
 
     @Override

@@ -14,13 +14,17 @@ public class GenerateAst {
         String outputDir = args[0];
         defineAst(outputDir, "Expr", Arrays.asList(
                 "Binary   : Expr left, Token operator, Expr right",
-                "Grouping : Expr expression",
+                "Grouping : Expr expression", 
                 "Literal  : Object value",
                 "Unary    : Token operator, Expr right",
+                "This     : Token keyword",
+                "Super    : Token keyword, Token method",
                 "Variable : Token name",
                 "Assign   : Token name, Expr value",
                 "Logical  : Expr left, Token operator, Expr right",
                 "Call     : Expr callee, Token paren, java.util.List<Expr> arguments",
+                "Get      : Expr object, Token name",
+                "Set      : Expr object, Token name, Expr value",
                 "AnonFunc : List<Token> params, List<Stmt> body",
                 "List     : java.util.List<Expr> exprs",
                 "Ternary  : Expr _if, Expr _then, Expr _else"
@@ -31,6 +35,8 @@ public class GenerateAst {
                 "Return     : Token keyword, Expr value",
                 "Var        : Token name, Expr initializer",
                 "Block      : java.util.List<Stmt> statements",
+                "Class      : Token name, Expr.Variable superclass," +
+                " List<Stmt.Function> methods",
                 "If         : Expr _if, Stmt _then, Stmt _else",
                 "While      : Expr condition, Stmt body",
                 "Break      :   ",

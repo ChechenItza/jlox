@@ -52,7 +52,103 @@ thrice(fun (a) {
 // "3".*/
 
 
-fun scope(a) {
-  var a = "local";
+class Box {}
+
+fun notMethod(argument) {
+  print "called function with " + argument;
 }
 
+var box = Box();
+box.function = notMethod;
+box.function("argument");
+
+class Person {
+  sayName() {
+    print this.name;
+  }
+}
+
+var jane = Person();
+jane.name = "Jane";
+
+var bill = Person();
+bill.name = "Bill";
+
+bill.sayName = jane.sayName;
+bill.sayName(); // ?
+
+class Bacon {
+  eat() {
+    print "Crunch crunch crunch!";
+  }
+}
+
+Bacon().eat(); // Prints "Crunch crunch crunch!".
+
+class Egotist {
+  speak() {
+    print this;
+  }
+}
+
+var method = Egotist().speak;
+method();
+
+class Cake {
+  taste() {
+    var adjective = "delicious";
+    print "The " + this.flavor + " cake is " + adjective + "!";
+  }
+}
+
+var cake = Cake();
+cake.flavor = "German chocolate";
+cake.taste(); // Prints "The German chocolate cake is delicious!".
+
+class Foo {
+  init() {
+    print this;
+  }
+}
+
+var foo = Foo();
+print foo.init();
+class A {
+  method() {
+    print "A method";
+  }
+}
+
+class B < A {
+  method() {
+    print "B method";
+  }
+
+  test() {
+    super.method();
+  }
+}
+
+class C < B {}
+
+C().test();
+C().method();
+var clk = clock();
+print clk;
+//var ui = input();
+//print ui;
+var str1 = "asd";
+var str2 = "asd";
+print compareStr(str1, str2);
+print equalsStr(str1, str2);
+print charAt(str1, 1);
+var str3 = "Welcome to Testing";
+print substring (str3, 0, 2);
+print lengthStr(str1);
+var abc = -123.234;
+var abd = 123.323;
+print abs(abc);
+print round(abc);
+print min(abc, abd);
+print max(abc, abd);
+print random();

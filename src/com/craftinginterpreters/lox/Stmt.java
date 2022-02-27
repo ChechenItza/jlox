@@ -9,6 +9,7 @@ abstract class Stmt {
     R visitReturnStmt(Return stmt);
     R visitVarStmt(Var stmt);
     R visitBlockStmt(Block stmt);
+    R visitClassStmt(Class stmt);
     R visitIfStmt(If stmt);
     R visitWhileStmt(While stmt);
     R visitBreakStmt(Break stmt);
@@ -77,6 +78,22 @@ abstract class Stmt {
     }
 
     final java.util.List<Stmt> statements;
+  }
+  static class Class extends Stmt {
+    Class(Token name, Expr.Variable superclass, List<Stmt.Function> methods) {
+      this.name = name;
+      this.superclass = superclass;
+      this.methods = methods;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitClassStmt(this);
+    }
+
+    final Token name;
+    final Expr.Variable superclass;
+    final List<Stmt.Function> methods;
   }
   static class If extends Stmt {
     If(Expr _if, Stmt _then, Stmt _else) {
