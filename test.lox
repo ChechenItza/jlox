@@ -52,6 +52,59 @@ thrice(fun (a) {
 // "3".*/
 
 
+
+//Clojure | Shyngys Kazbekov
+fun makeCounter() {
+  var i = 0;
+  fun count() {
+    i = i + 1;
+    print i;
+  }
+
+  return count;
+}
+
+var counter = makeCounter();
+counter(); // "1".
+counter(); // "2".
+
+//Anonymous functions | Shyngys Kazbekov
+fun anon(b) {
+    return fun () {
+        return b + b;
+    };
+}
+
+print anon(3)();
+
+//Ternary operator | Shyngys Kazbekov
+fun ternary(b) {
+    return b ? -1 : 2;
+}
+
+print ternary(false);
+
+//Expression List | Shyngys Kazbekov
+fun exprList() {
+    return 1,2,3,4,anon(3)(),5;
+}
+
+print exprList();
+
+//Break statement | Shyngys Kazbekov
+fun cycle(count) {
+    var i = 0;
+    while(true) {
+        if (i == count) {
+            break;
+        }
+        i = i + 1;
+    }
+}
+
+cycle(3);
+
+//Adding method to an instance | Ali Zhakiyev
 class Box {}
 
 fun notMethod(argument) {
@@ -62,6 +115,8 @@ var box = Box();
 box.function = notMethod;
 box.function("argument");
 
+
+//Regular class with a method | Ali Zhakiyev
 class Person {
   sayName() {
     print this.name;
@@ -77,6 +132,8 @@ bill.name = "Bill";
 bill.sayName = jane.sayName;
 bill.sayName(); // ?
 
+
+//Calling method on an object literal | Ali Zhakiyev
 class Bacon {
   eat() {
     print "Crunch crunch crunch!";
@@ -85,6 +142,8 @@ class Bacon {
 
 Bacon().eat(); // Prints "Crunch crunch crunch!".
 
+
+//Functions as first-class citizens | Ali Zhakiyev
 class Egotist {
   speak() {
     print this;
@@ -94,6 +153,8 @@ class Egotist {
 var method = Egotist().speak;
 method();
 
+
+//Class properties | Ali Zhakiyev
 class Cake {
   taste() {
     var adjective = "delicious";
@@ -105,6 +166,8 @@ var cake = Cake();
 cake.flavor = "German chocolate";
 cake.taste(); // Prints "The German chocolate cake is delicious!".
 
+
+//Not sure | Ali Zhakiyev
 class Foo {
   init() {
     print this;
@@ -113,6 +176,9 @@ class Foo {
 
 var foo = Foo();
 print foo.init();
+
+
+//Inheritance | Ali Zhakiyev
 class A {
   method() {
     print "A method";
@@ -133,10 +199,15 @@ class C < B {}
 
 C().test();
 C().method();
+
+//Built-in functions {{{
+////clock  | Shyngys Kazbekov
 var clk = clock();
 print clk;
+////user input  | Ali Zhakiyev
 //var ui = input();
 //print ui;
+////string operations  | Ali Zhakiyev
 var str1 = "asd";
 var str2 = "asd";
 print compareStr(str1, str2);
@@ -145,6 +216,7 @@ print charAt(str1, 1);
 var str3 = "Welcome to Testing";
 print substring (str3, 0, 2);
 print lengthStr(str1);
+////math operations  | Ali Zhakiyev
 var abc = -123.234;
 var abd = 123.323;
 print abs(abc);
@@ -152,3 +224,15 @@ print round(abc);
 print min(abc, abd);
 print max(abc, abd);
 print random();
+//}}}
+
+var array = Array(3);
+
+// "length" returns the number of elements.
+print array.length; // "3".
+
+// "set" sets the element at the given index to the given value.
+array.set(1, "new");
+
+// "get" returns the element at a given index.
+print array.get(1); // "new".

@@ -1,0 +1,326 @@
+class Room {
+    init(x, y, xx, yy, d) {
+        this.start_x = x;
+        this.start_y = y;
+        this.end_x = xx;
+        this.end_y = yy;
+        this.dir = d;
+    }
+}
+
+class Dungeon {
+    init(height, width) {
+    //Make the "canvas"
+        this.dungeon_ = Array(height);
+        for (var i = 0; i < width; i = i + 1) {
+            this.dungeon_.set(i, Array(width));
+        }
+
+        this.room_vec_ = List();
+
+    //Set the default parameters
+        this.D_HEIGHT_ = height;
+        this.D_WIDTH_ = width;
+
+        this.r_min_height_ = 4;
+        this.r_min_width_ = 4;
+
+        this.r_max_height_ = height / 4;
+        this.r_max_width_ = width / 7;
+
+        this.wall_ = "#";
+        this.floor_ = ".";
+        this.nothing_ = " ";
+
+        for (var i = 0; i < height; i = i + 1) {
+            for (var j = 0; j < width; j = j + 1) {
+                this.dungeon_.get(i).set(j, this.nothing_);
+            }
+        }
+
+        this.min_room_num_ = 30;
+
+    //Starting povar of the first room
+        this.y_pos_ = round(random() * height);
+        this.x_pos_ = round(random() * width);
+
+    //This is needed for genRoom() (recursive calls)
+        this.counter_ = 1;
+        this.is_executed_ = false;
+    }
+
+    generate() {
+    //Draw the "dungeon" on a "canvas"
+        while(!this.genRoom()) {}
+        this.genPassages();
+    }
+
+    genRoom() {
+    //Room width and height
+        var width = round(random() * (this.r_max_width_ - this.r_min_width_) + this.r_min_width_);
+        var height = round(random() * (this.r_max_height_ - this.r_min_height_) + this.r_min_height_);
+
+    //s_e - south east; s_w - south west; n_e - north east; n_w - north west;
+        var s_e = 0;  var n_e = 2;
+        var s_w = 1;  var n_w = 3;
+
+    //Store possible directions in %dir_vec vector
+        var dir_vec = List();
+        if (this.check(s_e, width, height)) {
+            dir_vec.push(s_e);
+        }
+        if (this.check(s_w, width, height)) {
+            dir_vec.push(s_w);
+        }
+        if (this.check(n_e, width, height)) {
+            dir_vec.push(n_e);
+        }
+        if (this.check(n_w, width, height)) {
+            dir_vec.push(n_w);
+        }
+
+    //Do a little trick if there is no possible directions and less than %min_room_num rooms
+        //!!! It is not guaranteed that the number of rooms will be equal to %min_room_num
+        if (dir_vec.length == 0 and this.room_vec_.length < this.min_room_num_) {
+            if (this.room_vec_.length - this.counter_ > 0) {
+                this.x_pos_ = this.room_vec_.get(this.room_vec_.length - this.counter_).end_x;
+                this.y_pos_ = this.room_vec_.get(this.room_vec_.length - this.counter_).end_y;
+                this.counter_ = this.counter_ + 1;
+                while (!this.genRoom()) {}
+                while (!this.genRoom()) {}
+            } else if (!this.is_executed_ and this.room_vec_.length - this.counter_ == 0) {
+                this.x_pos_ = this.room_vec_.get(0).start_x;
+                this.y_pos_ = this.room_vec_.get(0).start_y;
+                this.is_executed_ = true; //This condition should be executed only ONCE
+                this.genRoom();
+            }
+        }
+
+    //Break if no possible directions
+        if (dir_vec.length == 0) return true;
+
+    //Make room in randomly selected direction
+        var rnd_dir = dir_vec.get(round(random() * (dir_vec.length - 1)));
+        if (rnd_dir == s_e) {
+            for (var y = this.y_pos_; y < this.y_pos_ + height; y = y + 1) {
+                for (var x = this.x_pos_; x < this.x_pos_ + width; x = x + 1) {
+                    if (y == this.y_pos_ or y == this.y_pos_ + (height-1)
+                            or x == this.x_pos_ or x == this.x_pos_ + (width-1)) {
+                        this.dungeon_.get(y).set(x, this.wall_);
+                    } else {
+                        this.dungeon_.get(y).set(x, this.floor_);
+                    }
+                }
+            }
+            //Keep track of all rooms
+            var r = Room(this.x_pos_, this.y_pos_, this.x_pos_ + (width-1), this.y_pos_ + (height-1), s_e);
+            this.room_vec_.push(r);
+            //Set yandx position to the opposite corner
+            this.y_pos_ = this.y_pos_ + (height - 1);
+            this.x_pos_ = this.x_pos_ + (width - 1);
+        } else if (rnd_dir == s_w) {
+            for (var y = this.y_pos_; y < this.y_pos_ + height; y = y + 1) {
+                for (var x = this.x_pos_; x > this.x_pos_ - width; x = x - 1) {
+                    if (y == this.y_pos_ or y == this.y_pos_ + (height-1)
+                            or x == this.x_pos_ or x == this.x_pos_ - (width-1)) {
+                        this.dungeon_.get(y).set(x, this.wall_);
+                    } else {
+                        this.dungeon_.get(y).set(x, this.floor_);
+                    }
+                }
+            }
+            var r = Room(this.x_pos_, this.y_pos_, this.x_pos_ - (width-1), this.y_pos_ + (height-1), s_w);
+            this.room_vec_.push(r);
+            this.y_pos_ = this.y_pos_ + (height - 1);
+            this.x_pos_ = this.x_pos_ - (width - 1);
+        } else if (rnd_dir == n_e) {
+            for (var y = this.y_pos_; y > this.y_pos_ - height; y = y - 1) {
+                for (var x = this.x_pos_; x < this.x_pos_ + width; x = x + 1) {
+                    if (y == this.y_pos_ or y == this.y_pos_ - (height-1)
+                            or x == this.x_pos_ or x == this.x_pos_ + (width-1)) {
+                        this.dungeon_.get(y).set(x, this.wall_);
+                    } else {
+                        this.dungeon_.get(y).set(x, this.floor_);
+                    }
+                }
+            }
+            var r = Room(this.x_pos_, this.y_pos_, this.x_pos_ + (width-1), this.y_pos_ - (height-1), n_e);
+            this.room_vec_.push(r);
+            this.y_pos_ = this.y_pos_ - (height - 1);
+            this.x_pos_ = this.x_pos_ + (width - 1);
+        } else if (rnd_dir == n_w) {
+            for (var y = this.y_pos_; y > this.y_pos_ - height; y = y - 1) {
+                for (var x = this.x_pos_; x > this.x_pos_ - width; x = x - 1) {
+                    if (y == this.y_pos_ or y == this.y_pos_ - (height-1)
+                            or x == this.x_pos_ or x == this.x_pos_ - (width-1)) {
+                        this.dungeon_.get(y).set(x, this.wall_);
+                    } else {
+                        this.dungeon_.get(y).set(x, this.floor_);
+                    }
+                }
+            }
+            var r = Room(this.x_pos_, this.y_pos_, this.x_pos_ - (width-1), this.y_pos_ - (height-1), n_w);
+            this.room_vec_.push(r);
+            this.y_pos_ = this.y_pos_ - (height - 1);
+            this.x_pos_ = this.x_pos_ - (width - 1);
+        }
+
+    //Signal that there is still possible directions left
+        return false;
+    }
+
+    check(dir, width, height) {
+    //Check if it's possible to make room in the direction(%dir) that was passed
+        if (dir == 0) {
+            if (this.y_pos_ + height <= this.D_HEIGHT_ and this.x_pos_ + width <= this.D_WIDTH_) {
+                for (var y = this.y_pos_; y < this.y_pos_ + height; y = y + 1) {
+                    for (var x = this.x_pos_; x < this.x_pos_ + width; x = x + 1) {
+                        if (y == this.y_pos_ or y == this.y_pos_ + (height-1)
+                                or x == this.x_pos_ or x == this.x_pos_ + (width-1)) {} //Ignore wall_ collision
+                        else if (this.dungeon_.get(y).get(x) != this.nothing_) return false;
+                    }
+                }
+            } else return false;
+            return true;
+        } else if (dir == 1) {
+            if (this.y_pos_ + height <= this.D_HEIGHT_ and this.x_pos_ - width >= 0) {
+                for (var y = this.y_pos_; y < this.y_pos_ + height; y = y + 1) {
+                    for (var x = this.x_pos_; x > this.x_pos_ - width; x = x - 1) {
+                        if (y == this.y_pos_ or y == this.y_pos_ + (height-1)
+                                or x == this.x_pos_ or x == this.x_pos_ - (width-1)) {}
+                        else if (this.dungeon_.get(y).get(x) != this.nothing_) return false;
+                    }
+                }
+            } else return false;
+            return true;
+        } else if (dir == 2) {
+            if (this.y_pos_ - height >= 0 and this.x_pos_ + width <= this.D_WIDTH_) {
+                for (var y = this.y_pos_; y > this.y_pos_ - height; y = y - 1) {
+                    for (var x = this.x_pos_; x < this.x_pos_ + width; x = x + 1) {
+                        if (y == this.y_pos_ or y == this.y_pos_ - (height-1)
+                                or x == this.x_pos_ or x == this.x_pos_ + (width-1)) {}
+                        else if (this.dungeon_.get(y).get(x) != this.nothing_) return false;
+                    }
+                }
+            } else return false;
+            return true;
+        } else if (dir == 2) {
+            if (this.y_pos_ - height >= 0 and this.x_pos_ - width >= 0) {
+                for (var y = this.y_pos_; y > this.y_pos_ - height; y = y - 1) {
+                    for (var x = this.x_pos_; x > this.x_pos_ - width; x = x - 1) {
+                        if (y == this.y_pos_ or y == this.y_pos_ - (height-1)
+                                or x == this.x_pos_ or x == this.x_pos_ - (width-1)) {}
+                        else if (this.dungeon_.get(y).get(x) != this.nothing_) return false;
+                    }
+                }
+            } else return false;
+            return true;
+        }
+    }
+
+    genPassages() {
+    //Make passage between rooms
+        for (var i = 1; i < this.room_vec_.length; i = i + 1) {
+            for (var n = 1; n <= i; n = n + 1) {
+                if (this.room_vec_.get(i-n).end_y == this.room_vec_.get(i).start_y
+                        and this.room_vec_.get(i-n).end_x == this.room_vec_.get(i).start_x) {
+                    if (this.room_vec_.get(i-n).dir == 0) {
+                        if (this.room_vec_.get(i).dir == 0) {
+                            this.genVestibule(0, i);
+                        } else if (this.room_vec_.get(i).dir == 1) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x - 1, this.floor_);
+                        } else if (this.room_vec_.get(i).dir == 2) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x, this.floor_);
+                        }
+                    } else if (this.room_vec_.get(i-n).dir == 1) {
+                        if (this.room_vec_.get(i).dir == 0) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x + 1, this.floor_);
+                        } else if (this.room_vec_.get(i).dir == 1) {
+                            this.genVestibule(2, i);
+                        } else if (this.room_vec_.get(i).dir == 3) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x, this.floor_);
+                        }
+                    } else if (this.room_vec_.get(i-n).dir == 2) {
+                        if (this.room_vec_.get(i).dir == 0) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x, this.floor_);
+                        } else if (this.room_vec_.get(i).dir == 2) {
+                            this.genVestibule(1, i);
+                        } else if (this.room_vec_.get(i).dir == 3) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x - 1, this.floor_);
+                        }
+                    } else if (this.room_vec_.get(i-n).dir == 3) {
+                        if (this.room_vec_.get(i).dir == 1) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x, this.floor_);
+                        } else if (this.room_vec_.get(i).dir == 2) {
+                            this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x + 1, this.floor_);
+                        } else if (this.room_vec_.get(i).dir == 3) {
+                            this.genVestibule(3, i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    genVestibule(dir, i) {
+        //This belongs to genPassages()
+        //Have put this in separate method for the sake of clarity
+        if (dir == 1 or dir == 2) {
+            //Draw the wall_s if this vestibule is not collapsing with other rooms
+            if (this.dungeon_.get(this.room_vec_.get(i).start_y + 1).get(this.room_vec_.get(i).start_x + 1) == this.nothing_) {
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 2).set(this.room_vec_.get(i).start_x + 1,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 2).set(this.room_vec_.get(i).start_x + 2,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x + 2,this.wall_);
+            }
+            if (this.dungeon_.get(this.room_vec_.get(i).start_y - 1).get(this.room_vec_.get(i).start_x - 1) == this.nothing_) {
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 2).set(this.room_vec_.get(i).start_x - 2,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 2).set(this.room_vec_.get(i).start_x - 1,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x - 2,this.wall_);
+            }
+
+            this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x + 1,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x - 1,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x - 1,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x + 1,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x - 1,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x + 1,this.floor_);
+            this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x,this.floor_);
+        } else {
+            if (this.dungeon_.get(this.room_vec_.get(i).start_y + 1).get(this.room_vec_.get(i).start_x - 1) == this.nothing_) {
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 2).set(this.room_vec_.get(i).start_x - 1,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 2).set(this.room_vec_.get(i).start_x - 2,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x - 2,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x - 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y + 1).set(this.room_vec_.get(i).start_x + 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x - 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x + 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x,this.floor_);
+            }
+            if (this.dungeon_.get(this.room_vec_.get(i).start_y - 1).get(this.room_vec_.get(i).start_x + 1) == this.nothing_) {
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 2).set(this.room_vec_.get(i).start_x + 2,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 2).set(this.room_vec_.get(i).start_x + 1,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x + 2,this.wall_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x + 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y - 1).set(this.room_vec_.get(i).start_x - 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x - 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x + 1,this.floor_);
+                this.dungeon_.get(this.room_vec_.get(i).start_y).set(this.room_vec_.get(i).start_x,this.floor_);
+            }
+        }
+    }
+}
+
+var dungeon = Dungeon(50, 50);
+dungeon.generate();
+
+for (var i = 0; i < 50; i = i + 1) {
+    var line = "";
+    for (var j = 0; j < 50; j = j + 1) {
+        line = line + dungeon.dungeon_.get(i).get(j);
+    }
+    print line;
+}
