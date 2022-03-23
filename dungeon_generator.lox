@@ -31,6 +31,34 @@ class Dungeon {
         this.wall_ = "#";
         this.floor_ = ".";
         this.nothing_ = " ";
+        this.enemyBones = "B";
+        this.bonesHP = 5;
+        this.enemySnake = "S";
+        this.snakeHP = 3;
+        this.enemyGhoul = "G";
+        this.ghoulHP    = 7;
+        this.enemyRat   = "R";
+        this.ratHP  = 2;
+        this.heal   = "H";
+        this.player = "@";
+        this.hp = 10;
+        this.maxHealth = 10;
+        this.exp    = 0;
+        this.maxExp = 10;
+        this.lvl    = 1;
+        this.key    = "k";
+        this.keyNum = 0;
+        this.chest  = "C";
+        this.attack = 2;
+        this.playerNum = 1;
+        this.plX = 0;
+        this.plY = 0;
+
+        this.enemies = Array(4);
+        this.enemies.set(0, "B");
+        this.enemies.set(1, "S");
+        this.enemies.set(2, "G");
+        this.enemies.set(3, "R");
 
         for (var i = 0; i < height; i = i + 1) {
             for (var j = 0; j < width; j = j + 1) {
@@ -63,6 +91,11 @@ class Dungeon {
     //s_e - south east; s_w - south west; n_e - north east; n_w - north west;
         var s_e = 0;  var n_e = 2;
         var s_w = 1;  var n_w = 3;
+        var enemyNum = 3;
+        var healNum = 1;
+        var keyNum = 1;
+        var chestNum = 1;
+
 
     //Store possible directions in %dir_vec vector
         var dir_vec = List();
@@ -108,7 +141,26 @@ class Dungeon {
                             or x == this.x_pos_ or x == this.x_pos_ + (width-1)) {
                         this.dungeon_.get(y).set(x, this.wall_);
                     } else {
-                        this.dungeon_.get(y).set(x, this.floor_);
+                        if (healNum > 0 and random() >= 0.95 ) {
+                            this.dungeon_.get(y).set(x, this.heal);
+                            healNum = healNum - 1;
+                        } else if (keyNum > 0 and random() >= 0.94){
+                            this.dungeon_.get(y).set(x, this.key);
+                            keyNum = keyNum - 1;
+                        } else if (chestNum > 0 and random() >= 0.9) {
+                            this.dungeon_.get(y).set(x, this.chest);
+                            chestNum = chestNum - 1;
+                        } else if (enemyNum > 0 and random() >= 0.9) {
+                                                      this.dungeon_.get(y).set(x, this.enemies.get(round(random()*3)));
+                                                      enemyNum = enemyNum - 1;
+                        } else if (this.playerNum > 0) {
+                            this.dungeon_.get(y).set(x, this.player);
+                            this.playerNum = this.playerNum - 1;
+                            this.plX = x;
+                            this.plY = y;
+                        } else {
+                            this.dungeon_.get(y).set(x, this.floor_);
+                        }
                     }
                 }
             }
@@ -125,7 +177,26 @@ class Dungeon {
                             or x == this.x_pos_ or x == this.x_pos_ - (width-1)) {
                         this.dungeon_.get(y).set(x, this.wall_);
                     } else {
-                        this.dungeon_.get(y).set(x, this.floor_);
+                        if (healNum > 0 and random() >= 0.95 ) {
+                            this.dungeon_.get(y).set(x, this.heal);
+                            healNum = healNum - 1;
+                        } else if (keyNum > 0 and random() >= 0.94){
+                            this.dungeon_.get(y).set(x, this.key);
+                            keyNum = keyNum - 1;
+                        } else if (chestNum > 0 and random() >= 0.9) {
+                            this.dungeon_.get(y).set(x, this.chest);
+                            chestNum = chestNum - 1;
+                        } else if (enemyNum > 0 and random() >= 0.95) {
+                                                      this.dungeon_.get(y).set(x, this.enemies.get(round(random()*3)));
+                                                      enemyNum = enemyNum - 1;
+                        } else if (this.playerNum > 0) {
+                            this.dungeon_.get(y).set(x, this.player);
+                            this.playerNum = this.playerNum - 1;
+                            this.plX = x;
+                            this.plY = y;
+                        } else {
+                            this.dungeon_.get(y).set(x, this.floor_);
+                        }
                     }
                 }
             }
@@ -140,7 +211,26 @@ class Dungeon {
                             or x == this.x_pos_ or x == this.x_pos_ + (width-1)) {
                         this.dungeon_.get(y).set(x, this.wall_);
                     } else {
-                        this.dungeon_.get(y).set(x, this.floor_);
+                        if (healNum > 0 and random() >= 0.95 ) {
+                            this.dungeon_.get(y).set(x, this.heal);
+                            healNum = healNum - 1;
+                        } else if (keyNum > 0 and random() >= 0.94){
+                            this.dungeon_.get(y).set(x, this.key);
+                            keyNum = keyNum - 1;
+                        } else if (chestNum > 0 and random() >= 0.9) {
+                            this.dungeon_.get(y).set(x, this.chest);
+                            chestNum = chestNum - 1;
+                        } else if (enemyNum > 0 and random() >= 0.9) {
+                                                      this.dungeon_.get(y).set(x, this.enemies.get(round(random()*3)));
+                                                      enemyNum = enemyNum - 1;
+                        } else if (this.playerNum > 0) {
+                            this.dungeon_.get(y).set(x, this.player);
+                            this.playerNum = this.playerNum - 1;
+                            this.plX = x;
+                            this.plY = y;
+                        } else {
+                            this.dungeon_.get(y).set(x, this.floor_);
+                        }
                     }
                 }
             }
@@ -155,7 +245,26 @@ class Dungeon {
                             or x == this.x_pos_ or x == this.x_pos_ - (width-1)) {
                         this.dungeon_.get(y).set(x, this.wall_);
                     } else {
-                        this.dungeon_.get(y).set(x, this.floor_);
+                        if (healNum > 0 and random() >= 0.95 ) {
+                            this.dungeon_.get(y).set(x, this.heal);
+                            healNum = healNum - 1;
+                        } else if (keyNum > 0 and random() >= 0.94){
+                            this.dungeon_.get(y).set(x, this.key);
+                            keyNum = keyNum - 1;
+                        } else if (chestNum > 0 and random() >= 0.9) {
+                            this.dungeon_.get(y).set(x, this.chest);
+                            chestNum = chestNum - 1;
+                        } else if (enemyNum > 0 and random() >= 0.9) {
+                                                      this.dungeon_.get(y).set(x, this.enemies.get(round(random()*3)));
+                                                      enemyNum = enemyNum - 1;
+                        } else if (this.playerNum > 0) {
+                            this.dungeon_.get(y).set(x, this.player);
+                            this.playerNum = this.playerNum - 1;
+                            this.plX = x;
+                            this.plY = y;
+                        } else {
+                            this.dungeon_.get(y).set(x, this.floor_);
+                        }
                     }
                 }
             }
@@ -314,13 +423,242 @@ class Dungeon {
     }
 }
 
+fun move(dungeon) {
+    var inp = input();
+    var dir = "";
+    var y = dungeon.plY;
+    var x = dungeon.plX;
+    var nextY = 0;
+    var nextX = 0;
+    if (inp == "w") {
+        dir = dungeon.dungeon_.get(y - 1).get(x);
+        nextY = y - 1;
+        nextX = x;
+    } else if (inp == "a") {
+        dir = dungeon.dungeon_.get(y).get(x - 1);
+        nextY = y;
+        nextX = x - 1;
+    } else if (inp == "s") {
+        dir = dungeon.dungeon_.get(y + 1).get(x);
+        nextY = y + 1;
+        nextX = x;
+    } else if (inp == "d") {
+        dir = dungeon.dungeon_.get(y).get(x + 1);
+        nextY = y;
+        nextX = x + 1;
+    } else {
+        print "Incorrect input! Try again";
+        return move(dungeon);
+    }
+    if (dir == ".") {
+        dungeon.dungeon_.get(y).set(x, ".");
+        dungeon.plY = nextY;
+        dungeon.plX = nextX;
+        dungeon.dungeon_.get(nextY).set(nextX, "@");
+    } else if (dir == "#") {
+        print "You can't move in that direction, there is a wall! Try again";
+        return move(dungeon);
+    } else if (dir == "H") {
+        if (dungeon.hp + 3 > dungeon.maxHealth) {
+            print "You healed " + (dungeon.maxHealth - dungeon.hp) + " HP";
+            dungeon.hp = dungeon.maxHealth;
+        } else {
+            print "You healed 3 HP";
+            dungeon.hp = dungeon.hp + 3;
+        }
+        dungeon.dungeon_.get(y).set(x, ".");
+        dungeon.plY = nextY;
+        dungeon.plX = nextX;
+        dungeon.dungeon_.get(nextY).set(nextX, "@");
+    } else if (dir == "k") {
+        print "You found a key!";
+        dungeon.keyNum = dungeon.keyNum + 1;
+        dungeon.dungeon_.get(y).set(x, ".");
+        dungeon.plY = nextY;
+        dungeon.plX = nextX;
+        dungeon.dungeon_.get(nextY).set(nextX, "@");
+    } else if (dir == "C") {
+        if (dungeon.keyNum > 0){
+            print "You found a chest! Want to open it? y/n";
+            var response = input();
+            while (response != "y" and response != "n") {
+                print "Incorrect input! Try again";
+                response = input();
+            }
+            if (response == "y") {
+                dungeon.keyNum = dungeon.keyNum - 1;
+                if (random() <= 0.5) {
+                    print "You found a weapon upgrade! +1 to attack";
+                    dungeon.attack = dungeon.attack + 1;
+                    dungeon.dungeon_.get(y).set(x, ".");
+                    dungeon.plY = nextY;
+                    dungeon.plX = nextX;
+                    dungeon.dungeon_.get(nextY).set(nextX, "@");
+                } else if (random() >= 0.8) {
+                    print "You found a potion!";
+                    if (dungeon.hp + 3 > dungeon.maxHealth) {
+                        print "You healed " + (dungeon.maxHealth - dungeon.hp) + " HP";
+                        dungeon.hp = dungeon.maxHealth;
+                    } else {
+                        print "You healed 3 HP";
+                        dungeon.hp = dungeon.hp + 3;
+                    }
+                    dungeon.dungeon_.get(y).set(x, ".");
+                    dungeon.plY = nextY;
+                    dungeon.plX = nextX;
+                    dungeon.dungeon_.get(nextY).set(nextX, "@");
+                }
+            } else if (response == "n") {
+                print "Choose other direction to move";
+                return move(dungeon);
+            }
+        } else {
+            print "You found a chest! You have no keys to open it! Choose other direction to move";
+            return move(dungeon);
+        }
+    } else {
+        var enemy = "";
+        var enhp = 0;
+        var exp = 0;
+        var dmg = 0;
+        var missChance = 0.1;
+        if (dir == "R") {
+            enemy = "Rat";
+            enhp = dungeon.ratHP;
+            exp = 2;
+            dmg = 1;
+            missChance = 0.4;
+        } else if (dir == "S") {
+            enemy = "Snake";
+            enhp = dungeon.snakeHP;
+            exp = 3;
+            dmg = 2;
+            missChance = 0.3;
+        } else if (dir == "B") {
+            enemy = "Skeleton";
+            enhp = dungeon.bonesHP;
+            exp = 5;
+            dmg = 3;
+            missChance = 0.2;
+        } else {
+            enemy = "Ghoul";
+            enhp = dungeon.ghoulHP;
+            exp = 7;
+            dmg = 4;
+            missChance = 0.1;
+        }
+        print dir;
+        print "There is a " + enemy + " in front of you. What will you do? a - attack, p - try to persuade, r - run away";
+        var response = input();
+        while (response != "a" and response != "p" and response != "r"){
+            print "Incorrect input! Try again";
+            response = input();
+        }
+        if (response == "p") {
+            if (random() > 0.5) {
+                print "Persuasion successful! " + enemy + " run away";
+                print "You gained " + exp + " XP";
+                dungeon.exp = dungeon.exp + round(exp/2);
+                if (dungeon.exp >= dungeon.maxExp) {
+                    print "LEVEL UP!";
+                    dungeon.lvl = dungeon.lvl + 1;
+                    dungeon.exp = dungeon.exp - dungeon.maxExp;
+                }
+                dungeon.dungeon_.get(y).set(x, ".");
+                dungeon.plY = nextY;
+                dungeon.plX = nextX;
+                dungeon.dungeon_.get(nextY).set(nextX, "@");
+                return true;
+            } else {
+                print "Persuasion failed! Prepare to fight!";
+                response = "a";
+            }
+        }
+        if (response == "a") {
+            while (enhp > 0 and response == "a") {
+                if (random() > missChance) {
+                    print "You dealt " + dungeon.attack + " damage to a " + enemy;
+                    enhp = enhp - dungeon.attack;
+                    print enemy + " has " + enhp + " HP";
+                    if (enhp <= 0) {break;}
+                } else {
+                    print "Your attack missed!";
+                    print enemy + " has " + enhp + " HP";
+                }
+                if (random() > 0.1) {
+                    print enemy + " dealt " + dmg + " damage to you";
+                    dungeon.hp = dungeon.hp - dmg;
+                    if (dungeon.hp <= 0) {
+                        print "YOU DIED! GAME OVER";
+                        return false;
+                    }
+                    print "Your hp: " + dungeon.hp;
+                } else {
+                    print enemy + " missed!";
+                    print "Your hp: " + dungeon.hp;
+                }
+                while (true) {
+                    print "a - attack, r - run away";
+                    response = input();
+                    if (response == "a" or response == "r") {
+                        break;
+                    } else {
+                        print "Incorrect input! Try again";
+                    }
+                }
+            }
+            if (response == "a") {
+                print "You killed the " + enemy + "! Gained " + exp + " XP";
+                dungeon.exp = dungeon.exp + exp;
+                if (dungeon.exp >= dungeon.maxExp) {
+                    print "LEVEL UP!";
+                    dungeon.lvl = dungeon.lvl + 1;
+                    dungeon.exp = dungeon.exp - dungeon.maxExp;
+                }
+                dungeon.dungeon_.get(y).set(x, ".");
+                dungeon.plY = nextY;
+                dungeon.plX = nextX;
+                dungeon.dungeon_.get(nextY).set(nextX, "@");
+                return true;
+            }
+        }
+        if (response = "r") {
+            print "You ran away!";
+            print "Choose direction to move";
+            return move(dungeon);
+        }
+    }
+    return true;
+}
+
+
 var dungeon = Dungeon(50, 50);
 dungeon.generate();
-
-for (var i = 0; i < 50; i = i + 1) {
-    var line = "";
-    for (var j = 0; j < 50; j = j + 1) {
-        line = line + dungeon.dungeon_.get(i).get(j);
+var x = true;
+print "Welcome to the DUNGEON, adventurer!";
+print "There are only two ways to escape the DUNGEON. To reach level 10 or to DIE!";
+print "H - heal
+k - key
+C - chest
+R - rat
+S - snake
+B - skeleton
+G - ghoul
+WASD to walk";
+while (x) {
+    for (var i = 0; i < 50; i = i + 1) {
+        var line = "";
+        for (var j = 0; j < 50; j = j + 1) {
+            line = line + dungeon.dungeon_.get(i).get(j);
+        }
+        print line;
     }
-    print line;
+    print "|HP: " + dungeon.hp + "| |attack: " + dungeon.attack + "| |lvl: " + dungeon.lvl + "| |exp: "
+    + dungeon.exp + "/10| |keys: " + dungeon.keyNum + "|";
+    x = move(dungeon);
+    if (dungeon.lvl == 10) {
+        print "Congratulations! You have reached level 10!";
+        x = false;
+    }
 }
+

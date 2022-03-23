@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.IOException;
 
 class Interpreter implements Expr.Visitor<Object>,
                              Stmt.Visitor<Void> {
@@ -156,6 +157,22 @@ class Interpreter implements Expr.Visitor<Object>,
             public Object call(Interpreter interpreter,
                                List<Object> arguments) {
                 return new LoxList();
+            }
+        });
+        globals.define("read", new LoxCallable() {
+            @Override
+            public int arity() { return 0; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                               List<Object> arguments) {
+                try {
+                    return Character.toString((char)System.in.read());
+                }
+                catch (IOException e){
+                    System.out.println("Error reading from user");
+                }
+                return "error";
             }
         });
     }
